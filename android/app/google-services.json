@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "433545430272",
+    "project_id": "notenest-cfd45",
+    "storage_bucket": "notenest-cfd45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:433545430272:android:3f5f299403ed1ea3539fe5",
+        "android_client_info": {
+          "package_name": "com.example.note_nest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCi5Z7dlfJtGfgqbv27CkSkU6mepq76e-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
