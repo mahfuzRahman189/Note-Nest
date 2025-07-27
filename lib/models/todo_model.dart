@@ -1,16 +1,13 @@
-import 'package:uuid/uuid.dart';
+import 'package:hive/hive.dart';
+part 'todo_model.g.dart';
 
-class Todo {
-  final String id;
-  final String title;
+@HiveType(typeId: 0)
+class TodoModel extends HiveObject {
+  @HiveField(0)
+  String title;
+
+  @HiveField(1)
   bool isDone;
-  final DateTime createdAt;
 
-  Todo({
-    String? id, 
-    required this.title,
-    this.isDone = false,
-    DateTime? createdAt,
-  }) : id = id ?? const Uuid().v4(),
-       createdAt = createdAt ?? DateTime.now();
+  TodoModel({required this.title, this.isDone = false});
 }

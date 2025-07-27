@@ -1,33 +1,38 @@
-import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
+import 'package:hive/hive.dart';
+part 'habit_model.g.dart';
 
-class Habit {
-  final String id;
-  final String name;
-  Map<String, bool> completions; // "YYYY-MM-DD" -> true
-  final DateTime createdAt;
+@HiveType(typeId: 2)
+class HabitModel extends HiveObject {
+  @HiveField(0)
+  String name;
 
-  Habit({
-    String? id,
-    required this.name,
-    Map<String, bool>? completions,
-    DateTime? createdAt,
-  }) : id = id ?? const Uuid().v4(),
-       completions = completions ?? {},
-       createdAt = createdAt ?? DateTime.now();
+  @HiveField(1)
+  int streak;
 
-  bool isCompletedOn(DateTime date) {
-    String dateKey = DateFormat('yyyy-MM-dd').format(date);
-    return completions[dateKey] ?? false;
-  }
+  @HiveField(2)
+  Map<String, bool> completions;
 
+  HabitModel(
+      {required this.name, this.streak = 0, Map<String, bool>? completions})
+      : completions = completions ?? {};
+
+  // Helper: Calculate current streak
   int getStreak() {
     int streak = 0;
     DateTime checkDate = DateTime.now();
-    while (isCompletedOn(checkDate)) {
-      streak++;
-      checkDate = checkDate.subtract(const Duration(days: 1));
+    while (true) {
+      String dateKey = dateToKey(checkDate);
+      if (completions[dateKey] == true) {
+        streak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else {
+        break;
+      }
     }
     return streak;
+  }
+
+  static String dateToKey(DateTime date) {
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 }

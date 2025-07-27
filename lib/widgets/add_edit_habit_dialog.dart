@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../models/habit_model.dart';
-import '../providers/habit_provider.dart'; // Changed import
+import '../providers/habit_provider.dart';
 
 class AddEditHabitDialog extends StatefulWidget {
-  final HabitProvider habitProvider; // Changed
-  final Habit? habit;
+  final HabitProvider habitProvider;
+  final HabitModel? habit;
 
   const AddEditHabitDialog({
     super.key,
-    required this.habitProvider, // Changed
+    required this.habitProvider,
     this.habit,
   });
 
@@ -30,15 +30,12 @@ class _AddEditHabitDialogState extends State<AddEditHabitDialog> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       if (widget.habit == null) {
-        widget.habitProvider.addHabit(_name); // Use habitProvider
+        widget.habitProvider.addHabit(_name);
       } else {
-        final updatedHabit = Habit(
-          id: widget.habit!.id,
-          name: _name,
-          completions: widget.habit!.completions,
-          createdAt: widget.habit!.createdAt,
+        widget.habitProvider.updateHabit(
+          widget.habitProvider.habits.indexOf(widget.habit!),
+          HabitModel(name: _name, streak: widget.habit!.streak),
         );
-        widget.habitProvider.updateHabit(updatedHabit); // Use habitProvider
       }
       Navigator.of(context).pop();
     }
@@ -64,11 +61,12 @@ class _AddEditHabitDialogState extends State<AddEditHabitDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Cancel',style: TextStyle(color: Colors.teal)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.teal)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         ElevatedButton(
-          child: Text(widget.habit == null ? 'Add' : 'Save',style: TextStyle(color: Colors.teal)),
+          child: Text(widget.habit == null ? 'Add' : 'Save',
+              style: TextStyle(color: Colors.teal)),
           onPressed: _submit,
         ),
       ],

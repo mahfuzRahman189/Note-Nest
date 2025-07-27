@@ -1,40 +1,34 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import '../models/expense_model.dart';
-import 'package:uuid/uuid.dart';
 
 class ExpenseProvider with ChangeNotifier {
-  final List<Expense> _expenses = [];
-  final Uuid _uuid = const Uuid();
+  final Box<ExpenseModel> _expenseBox = Hive.box<ExpenseModel>('expenses');
 
-  List<Expense> get expenses => List.unmodifiable(_expenses..sort((a,b) => b.date.compareTo(a.date)));
-  double get totalExpensesAmount => _expenses.fold(0.0, (sum, item) => sum + item.amount);
+  List<ExpenseModel> get expenses =>
+      _expenseBox.values.toList().reversed.toList();
+  double get totalExpensesAmount =>
+      _expenseBox.values.fold(0.0, (sum, item) => sum + item.amount);
 
-  void addExpense(String description, double amount, DateTime date, {String? category}) {
-    final newExpense = Expense(
-      description: description,
-      amount: amount,
-      date: date,
-      category: category,
-    );
-    _expenses.add(newExpense);
+  void addExpense(String description, double amount, DateTime date) {
+    final newExpense =
+        ExpenseModel(description: description, amount: amount, date: date);
+    _expenseBox.add(newExpense);
     notifyListeners();
   }
- 
+
   void clearAllExpenses() {
-    _expenses.clear();
+    _expenseBox.clear();
     notifyListeners();
   }
-  
-  void updateExpense(Expense updatedExpense) {
-    final index = _expenses.indexWhere((expense) => expense.id == updatedExpense.id);
-    if (index != -1) {
-      _expenses[index] = updatedExpense;
-      notifyListeners();
-    }
+
+  void updateExpense(int index, ExpenseModel updatedExpense) {
+    _expenseBox.putAt(index, updatedExpense);
+    notifyListeners();
   }
 
-  void deleteExpense(String expenseId) {
-    _expenses.removeWhere((expense) => expense.id == expenseId);
+  void deleteExpense(int index) {
+    _expenseBox.deleteAt(index);
     notifyListeners();
   }
 }

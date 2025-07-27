@@ -39,50 +39,21 @@ class HabitScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               habit.name,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                           Text(
                             'Streak: ${habit.getStreak()}',
-                            style: TextStyle(fontSize: 14, color: Colors.orange[700], fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.orange[700],
+                                fontWeight: FontWeight.w500),
                           ),
                           IconButton(
-                            icon: Icon(Icons.edit_note_outlined, color: Colors.blueGrey[400]),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AddEditHabitDialog(
-                                  habitProvider: habitProvider,
-                                  habit: habit,
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete_outline, color: Colors.red[400]),
-                            onPressed: () async {
-                               final confirmDelete = await showDialog<bool>(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Confirm Delete'),
-                                    content: Text('Are you sure you want to delete habit: "${habit.name}"?'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: const Text('Cancel',style: TextStyle(color: Colors.teal),),
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                      ),
-                                      TextButton(
-                                        child: Text('Delete', style: TextStyle(color: Colors.red[600])),
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              if (confirmDelete == true) {
-                                 habitProvider.deleteHabit(habit.id);
-                              }
+                              habitProvider.deleteHabit(index);
                             },
                           ),
                         ],
@@ -96,11 +67,14 @@ class HabitScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: recentDates.map((date) {
-                          final isCompleted = habit.isCompletedOn(date);
-                          final isToday = DateUtils.isSameDay(date, DateTime.now());
+                          final dateKey = HabitModel.dateToKey(date);
+                          final isCompleted =
+                              habit.completions[dateKey] ?? false;
+                          final isToday =
+                              DateUtils.isSameDay(date, DateTime.now());
                           return GestureDetector(
                             onTap: () {
-                              habitProvider.toggleHabitCompletion(habit.id, date);
+                              habitProvider.toggleHabitCompletion(index, date);
                             },
                             child: Column(
                               children: [
@@ -108,22 +82,36 @@ class HabitScreen extends StatelessWidget {
                                   DateFormat('E').format(date),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                    color: isToday ? Colors.teal[700] : Colors.grey[600],
+                                    fontWeight: isToday
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isToday
+                                        ? Colors.teal[700]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                                 Text(
                                   DateFormat('d').format(date),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                    color: isToday ? Colors.teal[700] : Colors.grey[600],
+                                    fontWeight: isToday
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isToday
+                                        ? Colors.teal[700]
+                                        : Colors.grey[600],
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Icon(
-                                  isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                                  color: isCompleted ? Colors.green[600] : (isToday ? Colors.teal[300] : Colors.grey[400]),
+                                  isCompleted
+                                      ? Icons.check_circle
+                                      : Icons.circle_outlined,
+                                  color: isCompleted
+                                      ? Colors.green[600]
+                                      : (isToday
+                                          ? Colors.teal[300]
+                                          : Colors.grey[400]),
                                   size: 28,
                                 ),
                               ],
@@ -143,10 +131,10 @@ class HabitScreen extends StatelessWidget {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => AddEditHabitDialog(habitProvider: habitProvider),
+            builder: (context) =>
+                AddEditHabitDialog(habitProvider: habitProvider),
           );
         },
-        tooltip: 'Add Habit',
         child: const Icon(Icons.add),
       ),
     );

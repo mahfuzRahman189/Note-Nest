@@ -5,7 +5,7 @@ import '../providers/expense_provider.dart'; // Changed import
 
 class AddEditExpenseDialog extends StatefulWidget {
   final ExpenseProvider expenseProvider; // Changed
-  final Expense? expense;
+  final ExpenseModel? expense;
 
   const AddEditExpenseDialog({
     super.key,
@@ -22,7 +22,6 @@ class _AddEditExpenseDialogState extends State<AddEditExpenseDialog> {
   late String _description;
   late double _amount;
   late DateTime _selectedDate;
-  String? _category;
 
   final TextEditingController _dateController = TextEditingController();
 
@@ -32,7 +31,6 @@ class _AddEditExpenseDialogState extends State<AddEditExpenseDialog> {
     _description = widget.expense?.description ?? '';
     _amount = widget.expense?.amount ?? 0.0;
     _selectedDate = widget.expense?.date ?? DateTime.now();
-    _category = widget.expense?.category;
     _dateController.text = DateFormat.yMMMd().format(_selectedDate);
   }
 
@@ -55,22 +53,21 @@ class _AddEditExpenseDialogState extends State<AddEditExpenseDialog> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       if (widget.expense == null) {
-        widget.expenseProvider.addExpense( // Use expenseProvider
+        widget.expenseProvider.addExpense(
           _description,
           _amount,
           _selectedDate,
-          category: _category,
         );
       } else {
-        final updatedExpense = Expense(
-          id: widget.expense!.id,
-          description: _description,
-          amount: _amount,
-          date: _selectedDate,
-          category: _category,
-          createdAt: widget.expense!.createdAt,
+        widget.expenseProvider.updateExpense(
+          // Find the index of the expense in the box
+          widget.expenseProvider.expenses.indexOf(widget.expense!),
+          ExpenseModel(
+            description: _description,
+            amount: _amount,
+            date: _selectedDate,
+          ),
         );
-        widget.expenseProvider.updateExpense(updatedExpense); // Use expenseProvider
       }
       Navigator.of(context).pop();
     }
@@ -85,63 +82,56 @@ class _AddEditExpenseDialogState extends State<AddEditExpenseDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       title: Text(widget.expense == null ? 'Add Expense' : 'Edit Expense'),
       content: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextFormField(
-                initialValue: _description,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter a description';
-                  return null;
-                },
-                onSaved: (value) => _description = value!,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                initialValue: _amount != 0.0 ? _amount.toStringAsFixed(2) : '',
-                decoration: const InputDecoration(labelText: 'Amount', prefixText: '\$ '),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter an amount';
-                  if (double.tryParse(value) == null) return 'Please enter a valid number';
-                  if (double.parse(value) <= 0) return 'Amount must be positive';
-                  return null;
-                },
-                onSaved: (value) => _amount = double.parse(value!),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _dateController,
-                decoration: const InputDecoration(
-                  labelText: 'Date',
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
-                readOnly: true,
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                initialValue: _category,
-                decoration: const InputDecoration(labelText: 'Category (Optional)'),
-                onSaved: (value) => _category = value?.isNotEmpty == true ? value : null,
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              initialValue: _description,
+              decoration: const InputDecoration(labelText: 'Description'),
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Enter a description' : null,
+              onSaved: (value) => _description = value!,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              initialValue: _amount == 0.0 ? '' : _amount.toString(),
+              decoration: const InputDecoration(labelText: 'Amount'),
+              keyboardType: TextInputType.number,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Enter an amount' : null,
+              onSaved: (value) => _amount = double.tryParse(value ?? '') ?? 0.0,
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              decoration: const InputDecoration(labelText: 'Date'),
+              onTap: _pickDate,
+            ),
+          ],
         ),
       ),
-      actions: <Widget>[
+      actions: [
         TextButton(
-          child: const Text('Cancel',style: TextStyle(color: Colors.teal),),
           onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
-          child: Text(widget.expense == null ? 'Add' : 'Save',style: TextStyle(color: Colors.teal),),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.teal[700],
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
           onPressed: _submit,
+          child: Text(widget.expense == null ? 'Add' : 'Update'),
         ),
       ],
     );

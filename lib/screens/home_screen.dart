@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
-import '../providers/auth_provider.dart'; 
+import '../providers/auth_provider.dart';
 import '../providers/todo_provider.dart';
-import '../providers/expense_provider.dart'; 
-import '../providers/habit_provider.dart'; 
+import '../providers/expense_provider.dart';
+import '../providers/habit_provider.dart';
+import '../providers/profile_provider.dart';
 import 'todo_screen.dart';
 import 'expense_screen.dart';
 import 'habit_screen.dart';
@@ -47,6 +48,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppStateProvider>(context);
+    final profile = Provider.of<ProfileProvider>(context);
 
     const Color selectedColor = Colors.teal;
 
@@ -58,42 +60,118 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[appState.selectedIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () => _performLogout(context), // Use the helper
-          ),
-        ],
+        // Removed logout button from AppBar
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: const Text(
-                "Md Mahfuzur Rahman",
+              accountName: Text(
+                profile.name,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
-              accountEmail: const Text(
-                "ID : 0182220012101189",
+              accountEmail: Text(
+                profile.email,
                 style: TextStyle(fontSize: 14),
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: const Color.fromARGB(255, 48, 164, 137),
-                child: const Text(
-                  "MMR",
-                  style: TextStyle(fontSize: 24.0, color: Colors.white, ),
+                child: Text(
+                  profile.shortForm,
+                  style: TextStyle(fontSize: 24.0, color: Colors.white),
                 ),
               ),
               decoration: BoxDecoration(
                 color: Colors.teal[600],
               ),
             ),
+            // Add edit option for name and short form
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.teal),
+              title: const Text('Edit Profile',
+                  style: TextStyle(color: Colors.teal)),
+              onTap: () {
+                final nameController =
+                    TextEditingController(text: profile.name);
+                final shortFormController =
+                    TextEditingController(text: profile.shortForm);
+                final emailController =
+                    TextEditingController(text: profile.email);
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      title: const Text('Update Profile'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              labelText: 'Name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: shortFormController,
+                            decoration: InputDecoration(
+                              labelText: 'Short Form',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal[700],
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: () {
+                            profile.updateProfile(
+                              nameController.text,
+                              shortFormController.text,
+                              emailController.text,
+                            );
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Update'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
             ListTile(
               leading: Icon(
                 Icons.list_alt_rounded,
-                
                 color: appState.selectedIndex == 0
                     ? selectedColor
                     : unselectedColor,
@@ -110,7 +188,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               selected: appState.selectedIndex == 0,
-             
               onTap: () {
                 _navigateToPage(context, 0);
               },
@@ -164,11 +241,7 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             const Divider(),
-            ListTile(
-              leading: Icon(Icons.exit_to_app, color: unselectedColor),
-              title: Text('Logout', style: TextStyle(color: unselectedColor)),
-              onTap: () => _performLogout(context),
-            ),
+            // Removed logout ListTile from Drawer
           ],
         ),
       ),

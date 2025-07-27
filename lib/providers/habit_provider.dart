@@ -1,46 +1,42 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import '../models/habit_model.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
 class HabitProvider with ChangeNotifier {
-  final List<Habit> _habits = [];
-  final Uuid _uuid = const Uuid();
+  final Box<HabitModel> _habitBox = Hive.box<HabitModel>('habits');
 
-  List<Habit> get habits => List.unmodifiable(_habits..sort((a,b) => b.createdAt.compareTo(a.createdAt)));
+  List<HabitModel> get habits => _habitBox.values.toList().reversed.toList();
 
   void addHabit(String name) {
-    final newHabit = Habit(name: name);
-    _habits.add(newHabit);
+    final newHabit = HabitModel(name: name);
+    _habitBox.add(newHabit);
     notifyListeners();
   }
 
-  void updateHabit(Habit updatedHabit) {
-    final index = _habits.indexWhere((habit) => habit.id == updatedHabit.id);
-    if (index != -1) {
-      _habits[index] = updatedHabit;
-      notifyListeners();
-    }
+  void updateHabit(int index, HabitModel updatedHabit) {
+    _habitBox.putAt(index, updatedHabit);
+    notifyListeners();
   }
-  
+
   void clearAllHabits() {
-    _habits.clear();
+    _habitBox.clear();
     notifyListeners();
   }
-  
-  void toggleHabitCompletion(String habitId, DateTime date) {
-    final index = _habits.indexWhere((habit) => habit.id == habitId);
-    if (index != -1) {
-      final habit = _habits[index];
-      final dateKey = DateFormat('yyyy-MM-dd').format(date);
-      final currentCompletionStatus = habit.completions[dateKey] ?? false;
-      habit.completions[dateKey] = !currentCompletionStatus;
+
+  void toggleHabitCompletion(int index, DateTime date) {
+    final habit = _habitBox.getAt(index);
+    if (habit != null) {
+      final dateKey = HabitModel.dateToKey(date);
+      final current = habit.completions[dateKey] ?? false;
+      habit.completions[dateKey] = !current;
+      habit.save();
       notifyListeners();
     }
   }
 
-  void deleteHabit(String habitId) {
-    _habits.removeWhere((habit) => habit.id == habitId);
+  void deleteHabit(int index) {
+    _habitBox.deleteAt(index);
     notifyListeners();
   }
 }

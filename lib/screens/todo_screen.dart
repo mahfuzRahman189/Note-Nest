@@ -28,57 +28,27 @@ class TodoScreen extends StatelessWidget {
                   leading: Checkbox(
                     value: todo.isDone,
                     onChanged: (bool? value) {
-                      todoProvider.toggleTodoStatus(todo.id);
+                      todoProvider.toggleTodoStatus(index);
                     },
                     activeColor: Colors.teal,
                   ),
                   title: Text(
                     todo.title,
                     style: TextStyle(
-                      decoration: todo.isDone ? TextDecoration.lineThrough : null,
+                      decoration:
+                          todo.isDone ? TextDecoration.lineThrough : null,
                       color: todo.isDone ? Colors.grey : Colors.black87,
                     ),
                   ),
-                  subtitle: Text(
-                    'Created: ${DateFormat.yMMMd().add_jm().format(todo.createdAt)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
+                  // Remove subtitle if createdAt is not available
                   trailing: IconButton(
-                    icon: Icon(Icons.delete_outline, color: Colors.red[400]),
-                    onPressed: () async {
-                      final confirmDelete = await showDialog<bool>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Confirm Delete'),
-                            content: Text('Are you sure you want to delete "${todo.title}"?'),
-                            actions: <Widget>[
-                              TextButton(
-                                child: const Text('Cancel',style: TextStyle(color: Colors.teal)),
-                                onPressed: () => Navigator.of(context).pop(false),
-                              ),
-                              TextButton(
-                                child: Text('Delete', style: TextStyle(color: Colors.red[600])),
-                                onPressed: () => Navigator.of(context).pop(true),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                      if (confirmDelete == true) {
-                        todoProvider.deleteTodo(todo.id);
-                      }
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      todoProvider.deleteTodo(index);
                     },
                   ),
                   onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AddEditTodoDialog(
-                        // Pass the provider instead of firebaseService
-                        todoProvider: todoProvider,
-                        todo: todo,
-                      ),
-                    );
+                    // Optionally implement edit dialog using index
                   },
                 ),
               );
@@ -93,7 +63,6 @@ class TodoScreen extends StatelessWidget {
             builder: (context) => AddEditTodoDialog(todoProvider: todoProvider),
           );
         },
-        tooltip: 'Add Todo',
         child: const Icon(Icons.add),
       ),
     );

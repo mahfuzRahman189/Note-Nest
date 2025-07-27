@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import '../models/todo_model.dart';
-import '../providers/todo_provider.dart'; // Changed import
+import '../providers/todo_provider.dart';
 
 class AddEditTodoDialog extends StatefulWidget {
-  // Changed firebaseService to todoProvider
   final TodoProvider todoProvider;
-  final Todo? todo;
+  final TodoModel? todo;
 
   const AddEditTodoDialog({
     super.key,
-    required this.todoProvider, // Changed parameter
+    required this.todoProvider,
     this.todo,
   });
 
@@ -33,15 +32,12 @@ class _AddEditTodoDialogState extends State<AddEditTodoDialog> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       if (widget.todo == null) {
-        widget.todoProvider.addTodo(_title); // Use todoProvider
+        widget.todoProvider.addTodo(_title);
       } else {
-        final updatedTodo = Todo(
-          id: widget.todo!.id,
-          title: _title,
-          isDone: _isDone,
-          createdAt: widget.todo!.createdAt,
+        widget.todoProvider.updateTodo(
+          widget.todoProvider.todos.indexOf(widget.todo!),
+          TodoModel(title: _title, isDone: _isDone),
         );
-        widget.todoProvider.updateTodo(updatedTodo); // Use todoProvider
       }
       Navigator.of(context).pop();
     }
@@ -82,11 +78,12 @@ class _AddEditTodoDialogState extends State<AddEditTodoDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Cancel',style: TextStyle(color: Colors.teal)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.teal)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         ElevatedButton(
-          child: Text(widget.todo == null ? 'Add' : 'Save',style: TextStyle(color: Colors.teal)),
+          child: Text(widget.todo == null ? 'Add' : 'Save',
+              style: TextStyle(color: Colors.teal)),
           onPressed: _submit,
         ),
       ],

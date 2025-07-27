@@ -10,36 +10,44 @@ class ExpenseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expenseProvider = Provider.of<ExpenseProvider>(context, listen: false);
+    final expenseProvider =
+        Provider.of<ExpenseProvider>(context, listen: false);
 
     return Scaffold(
       body: Column(
         children: [
-          Consumer<ExpenseProvider>(
-            builder: (context, provider, child) {
-               if (provider.expenses.isEmpty) return const SizedBox.shrink(); // don't show summary if no expenses
-              return Card(
-                color: Colors.teal[50],
-                margin: const EdgeInsets.all(12.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total Expenses:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal[800]),
-                      ),
-                      Text(
-                        NumberFormat.currency(locale: 'en_US', symbol: '\$').format(provider.totalExpensesAmount),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red[700]),
-                      ),
-                    ],
-                  ),
+          Consumer<ExpenseProvider>(builder: (context, provider, child) {
+            if (provider.expenses.isEmpty)
+              return const SizedBox
+                  .shrink(); // don't show summary if no expenses
+            return Card(
+              color: Colors.teal[50],
+              margin: const EdgeInsets.all(12.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total Expenses:',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal[800]),
+                    ),
+                    Text(
+                      NumberFormat.currency(locale: 'en_BD', symbol: '\৳')
+                          .format(provider.totalExpensesAmount),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700]),
+                    ),
+                  ],
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          }),
           Expanded(
             child: Consumer<ExpenseProvider>(
               builder: (context, provider, child) {
@@ -54,14 +62,21 @@ class ExpenseScreen extends StatelessWidget {
                     return Card(
                       child: ListTile(
                         leading: CircleAvatar(
-                           backgroundColor: Colors.red[100],
-                           child: FittedBox( // Ensure text fits
+                          backgroundColor: Colors.red[100],
+                          child: FittedBox(
+                            // Ensure text fits
                             fit: BoxFit.scaleDown,
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: Text(
-                                NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 0).format(expense.amount),
-                                style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold),
+                                NumberFormat.currency(
+                                        locale: 'en_BD',
+                                        symbol: '৳',
+                                        decimalDigits: 0)
+                                    .format(expense.amount),
+                                style: TextStyle(
+                                    color: Colors.red[700],
+                                    fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -69,33 +84,42 @@ class ExpenseScreen extends StatelessWidget {
                         ),
                         title: Text(expense.description),
                         subtitle: Text(
-                          '${DateFormat.yMMMd().format(expense.date)}${expense.category != null && expense.category!.isNotEmpty ? ' - ${expense.category}' : ''}',
-                           style: TextStyle(color: Colors.grey[600]),
+                          DateFormat.yMMMd().format(expense.date),
+                          style: TextStyle(color: Colors.grey[600]),
                         ),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete_outline, color: Colors.red[400]),
+                          icon: Icon(Icons.delete_outline,
+                              color: Colors.red[400]),
                           onPressed: () async {
-                             final confirmDelete = await showDialog<bool>(
+                            final confirmDelete = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text('Confirm Delete'),
-                                  content: Text('Are you sure you want to delete expense: "${expense.description}"?'),
+                                  content: Text(
+                                      'Are you sure you want to delete expense: "${expense.description}"?'),
                                   actions: <Widget>[
                                     TextButton(
-                                      child: const Text('Cancel',style: TextStyle(color: Colors.teal),),
-                                      onPressed: () => Navigator.of(context).pop(false),
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(color: Colors.teal),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
                                     ),
                                     TextButton(
-                                      child: Text('Delete', style: TextStyle(color: Colors.red[600])),
-                                      onPressed: () => Navigator.of(context).pop(true),
+                                      child: Text('Delete',
+                                          style: TextStyle(
+                                              color: Colors.red[600])),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
                                     ),
                                   ],
                                 );
                               },
                             );
                             if (confirmDelete == true) {
-                               expenseProvider.deleteExpense(expense.id);
+                              expenseProvider.deleteExpense(index);
                             }
                           },
                         ),
@@ -121,7 +145,8 @@ class ExpenseScreen extends StatelessWidget {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => AddEditExpenseDialog(expenseProvider: expenseProvider),
+            builder: (context) =>
+                AddEditExpenseDialog(expenseProvider: expenseProvider),
           );
         },
         tooltip: 'Add Expense',

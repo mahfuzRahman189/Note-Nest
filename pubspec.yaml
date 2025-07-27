@@ -1,10 +1,10 @@
 name: multi_tracker_app_ui_only
 description: A UI-only combined Todo, Expense, and Habit Tracker app.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0' # Adjust based on your Flutter SDK
+  sdk: ">=3.0.0 <4.0.0" # Adjust based on your Flutter SDK
 
 dependencies:
   flutter:
@@ -12,18 +12,22 @@ dependencies:
 
   # ... your existing dependencies (cupertino_icons, provider, intl, uuid)
   sqflite: ^2.3.3 # For SQLite database
-  path_provider: ^2.1.3 # To find the correct local path for the database
+  path_provider: ^2.0.15 # To find the correct local path for the database
   path: ^1.9.0 # For joining paths (often used with path_provider)
 
   cupertino_icons: ^1.0.6
   provider: ^6.1.2 # For state management
   intl: ^0.19.0 # For date formatting
   uuid: ^4.3.3 # For generating unique IDs
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.6
 
 flutter:
   uses-material-design: true
